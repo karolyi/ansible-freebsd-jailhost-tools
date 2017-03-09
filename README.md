@@ -28,7 +28,7 @@ Including an example of how to use your role (for instance, with variables passe
     - hosts:
         - localhost
       roles:
-         - karolyi.freebsd-jailhost-tools
+         - karolyi.ansible-freebsd-jailhost-tools
 
 License
 -------

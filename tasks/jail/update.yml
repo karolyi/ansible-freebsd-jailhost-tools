@@ -46,14 +46,14 @@
       include_type: '{{ "jail_" + jail_name + "_include_update_precreate" }}'
 
   - name: Creating a new {{ jail_name }} jail
-    include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/create.yml'
+    include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/create.yml'
 
   - include: '{{ vars["jail_" + jail_name + "_include_update_prestart"] | default(jail_include_noop) }}'
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_update_prestart" }}'
 
   - name: Starting the new jail_syslog
-    include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/start.yml'
+    include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/start.yml'
 
   - include: '{{ vars["jail_" + jail_name + "_include_update_poststart"] | default(jail_include_noop) }}'
     vars:
