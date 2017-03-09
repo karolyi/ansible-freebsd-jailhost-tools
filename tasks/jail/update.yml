@@ -1,0 +1,65 @@
+- name: Looking up if the {{ jail_name }} jail needs to be replaced, setting up variables
+  set_fact:
+    jail_{{ jail_name }}_must_replace: >-
+      {{
+        lookup(
+          'pipe', '/usr/sbin/chroot ' +
+          dynamic_jails_path + '/' +
+          vars['jail_' + jail_name +  '_existing_dirs'][0] +
+          ' /bin/freebsd-version -u'
+        ) != latest_snapshot
+      }}
+    jail_{{ jail_name }}_newest_id: >-
+      {{
+        vars['jail_' + jail_name + '_existing_dirs'][0]
+      }}
+
+- block:
+
+  - name: Check if packages have to be upgraded
+    command:
+      /usr/sbin/pkg
+      -j {{ vars['jail_' + jail_name + '_newest_id'] }}
+      upgrade --dry-run -y
+    register: jail_pkgs
+    ignore_errors: true
+    changed_when: jail_pkgs.rc != 0
+
+  - name: Namespacing task return value
+    set_fact:
+      jail_{{ jail_name }}_pkgs: '{{ jail_pkgs }}'
+
+  - name: Upgrade packages when necessary
+    command:
+      /usr/sbin/pkg
+      -j {{ vars['jail_' + jail_name + '_newest_id'] }}
+      upgrade -y
+    when: '{{ vars["jail_" + jail_name + "_pkgs"] | changed }}'
+
+  when: '{{ not vars["jail_" + jail_name + "_must_replace"] }}'
+
+
+- block:
+
+  - include: '{{ vars["jail_" + jail_name + "_include_update_precreate"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_update_precreate" }}'
+
+  - name: Creating a new {{ jail_name }} jail
+    include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/create.yml'
+
+  - include: '{{ vars["jail_" + jail_name + "_include_update_prestart"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_update_prestart" }}'
+
+  - name: Starting the new jail_syslog
+    include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/start.yml'
+
+  - include: '{{ vars["jail_" + jail_name + "_include_update_poststart"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_update_poststart" }}'
+
+  when: '{{ vars["jail_" + jail_name + "_must_replace"] }}'
+
+
+

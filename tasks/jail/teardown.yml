@@ -1,0 +1,47 @@
+- name: Check if the jail {{ jail_id }} runs
+  set_fact:
+    jail_is_old_running: >-
+      {{ jail_id in running_jail_ids }}
+
+- name: Terminating jail when running
+  command:
+    /usr/sbin/jail -r {{ jail_id }}
+  when: jail_is_old_running
+
+- name: Getting mounts under this jail
+  shell:
+    /sbin/mount -p
+    | grep '{{ dynamic_jails_path }}/{{ jail_id }}'
+    | awk '{print $2}'
+    warn=no
+  register: mounts_under_jail
+
+- name: Unmounting all mounts from under the jail so it could be destroyed
+  command:
+    /sbin/umount
+    '{{ mountpoint }}'
+  when: '{{ mountpoint != dynamic_jails_path + "/" + jail_id }}'
+  with_items: '{{ mounts_under_jail.stdout_lines|sort(reverse=True) }}'
+  loop_control:
+    loop_var: mountpoint
+
+- name: Destroying ZFS mount
+  zfs:
+    name: >-
+      {{ dynamic_jails_dataset_name }}/{{ jail_id }}
+    state: absent
+
+- name: Removing jail directory
+  file:
+    path: >-
+      {{ dynamic_jails_path }}/{{ jail_id }}
+    state: absent
+
+- name: Removing config block for {{ jail_id }} from /etc/jail.conf
+  blockinfile:
+    state: absent
+    dest: '/etc/jail.conf'
+    # Keep this line at the bottom so vim can use proper syntax higlighting
+    insertbefore: '^# vim: syn=conf$'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ jail_id }}'
+

@@ -1,0 +1,42 @@
+- name: Setting new {{ jail_name }} jail name
+  set_fact:
+    jail_{{ jail_name }}_newest_id: "\
+      {{ jail_prefix }}\
+      {{ ansible_date_time.year }}\
+      {{ ansible_date_time.month }}\
+      {{ ansible_date_time.day }}-\
+      {{ ansible_date_time.hour }}\
+      {{ ansible_date_time.minute }}\
+      {{ ansible_date_time.second }}"
+
+- name: Set other variables for the create
+  set_fact:
+    jail_{{ jail_name }}_is_new_created: true
+    jail_{{ jail_name }}_new_dataset_name:
+      '{{ dynamic_jails_dataset_name }}/{{ vars["jail_" + jail_name + "_newest_id"] }}'
+    jail_{{ jail_name }}_new_path:
+      '{{ dynamic_jails_path }}/{{ vars["jail_" + jail_name + "_newest_id"] }}'
+    jail_{{ jail_name }}_new_ip: '{{ available_jail_ip }}'
+
+- name: Clone a new ZFS filesystem for the jail
+  zfs:
+    origin: '{{ template_dataset_root_name }}@{{ latest_snapshot }}'
+    name: '{{ vars["jail_" + jail_name + "_new_dataset_name"] }}'
+    mountpoint: '{{ vars["jail_" + jail_name + "_new_path"] }}'
+    state: present
+
+- name: Copy rc.conf over to the new jail
+  copy:
+    src: rc.conf
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc'
+
+- name: Copy resolv.conf over to the new jail
+  copy:
+    src: /etc/resolv.conf
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc'
+
+- name: Setup timezone in jail
+  command:
+    /usr/sbin/tzsetup
+    -C {{ vars['jail_' + jail_name + '_new_path'] }}
+    {{ vars['jail_' + jail_name + '_timezone'] }}

@@ -1,0 +1,45 @@
+- name: Put syslog jail IP into /etc/hosts
+  lineinfile:
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc/hosts'
+    # Hostname + 2 tabulators here
+    line: 'jail_{{ jail_name }}		{{ vars["jail_" + jail_name + "_new_ip"] }}'
+
+- name: Updating jails.ini
+  blockinfile:
+    create: yes
+    dest: '{{ dynamic_jails_path }}/configs/jails.ini'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ jail_name }}'
+    block: |
+      [{{ jail_name }}]
+      name = {{ vars['jail_' +  jail_name + '_newest_id'] }}
+      ip4_addr = {{ vars['jail_' + jail_name + '_new_ip'] }}
+
+- name: Formatting jail.conf options for {{ vars['jail_' + jail_name + '_newest_id'] }}
+  set_fact:
+    '{{ "jail_" + jail_name + "_formatted_options" }}': "{{ '\n    '.join((vars['jail_' + jail_name + '_config_opts']|default(jail_default_config_opts)).split('\n')) }}"
+
+- name: Writing config block for {{ vars['jail_' + jail_name + '_newest_id'] }} into /etc/jail.conf
+  blockinfile:
+    create: yes
+    state: present
+    dest: '/etc/jail.conf'
+    insertbefore: '^# vim: syn=conf$'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ vars["jail_" +  jail_name + "_newest_id"] }}'
+    block: |
+      {{ vars['jail_' + jail_name + '_newest_id'] }} {
+          path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
+          host.hostname={{ vars['jail_' + jail_name + '_newest_id'] }};
+          name={{ vars['jail_' + jail_name + '_newest_id'] }};
+          ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip'] }}";
+          {{
+            vars["jail_" + jail_name + "_formatted_options"]
+          }}
+      }
+
+- name: Starting jail
+  command:
+    jail -c
+    {{
+      vars['jail_' + jail_name + '_newest_id']
+    }}
+

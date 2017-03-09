@@ -1,0 +1,62 @@
+---
+
+- name: Gathering existing jail directories
+  find:
+    file_type: directory
+    paths: '{{ dynamic_jails_path }}'
+    patterns: '{{ jail_prefix }}*'
+  register: dirs_found
+
+- name: Set default facts for the task
+  set_fact:
+    jail_{{ jail_name }}_is_new_created: false
+    jail_{{ jail_name }}_existing_dirs: '{{ dirs_found.files | map(attribute="path") | map("basename") | sort(reverse=True) }}'
+
+
+- block:
+  - include: '{{ vars["jail_" + jail_name + "_include_createnew_precreate"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_createnew_precreate" }}'
+
+  - name: Creating a {{ jail_name }} jail when there's none yet
+    include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/create.yml'
+
+  - include: '{{ vars["jail_" + jail_name + "_include_createnew_prestart"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_createnew_prestart" }}'
+
+  - name: Starting the {{ jail_name }} jail
+    include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/start.yml'
+
+  - include: '{{ vars["jail_" + jail_name + "_include_createnew_poststart"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_createnew_poststart" }}'
+
+  when: >-
+    {{
+      vars["jail_" + jail_name + "_existing_dirs"] | count == 0 or
+      vars["jail_" + jail_name + "_force_recreate"]
+    }}
+
+
+# This task here is to set a boolean to this 'level', since the jail_{{ jail_name }}_is_new_created is used elsewhere too.
+# When we change that variable elsewhere downwards, the tasks could get skipped because the 'when' statements
+# are dynamically evaluated.
+- name: Set if the {{ jail_name }} jail has to be updated or a new has been created.
+  set_fact:
+    jail_{{ jail_name }}_run_update: '{{ not vars["jail_" + jail_name + "_is_new_created"] }}'
+
+- name: Checking the latest {{ jail_name }} jail, updating/replacing when necessary
+  include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/update.yml'
+  when: '{{ vars["jail_" + jail_name + "_run_update"] }}'
+
+- name: Updating jail_{{ jail_name }}_existing_dirs when necessary
+  set_fact:
+    jail_{{ jail_name }}_existing_dirs: '{{ vars["jail_" + jail_name + "_existing_dirs"][1:] }}'
+  when: '{{ not vars["jail_" + jail_name + "_is_new_created"] }}'
+
+- name: Tidying up remaining unused jails
+  include: '{{ ansible_roles_path }}/karolyi.freebsd-jailhost-tools/tasks/jail/teardown.yml jail_id={{ item }}'
+  with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
+
+

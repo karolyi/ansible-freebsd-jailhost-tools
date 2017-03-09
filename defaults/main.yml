@@ -1,0 +1,80 @@
+---
+zroot_name: tank/root
+template_dataset_name: >-
+  {{ zroot_name }}/templatejail
+template_dataset_root_name: >-
+  {{ template_dataset_name }}/root
+
+jail_path: /usr/jails
+template_jail_path: >-
+  {{ jail_path|quote }}/template
+template_jail_root_path: >-
+  {{ template_jail_path }}/root
+
+latest_snapshot: >-
+  {{
+    lookup(
+      'pipe', '/usr/sbin/chroot "{{ template_jail_root_path|quote }}" /bin/freebsd-version -u'
+    )
+  }}
+
+dynamic_jails_dataset_name: >-
+  {{ zroot_name }}/dynamic-jails-root
+dynamic_jails_path: >-
+  {{ jail_path }}/dynamic-jails
+
+valid_jail_ips: "{{ lookup('pipe', 'seq -f 127.0.0.%g 2 254').split() }}"
+used_jail_ips: >-
+  {{ lookup('pipe', 'jls -q ip4.addr').split() }}
+available_jail_ip: >-
+  {{ valid_jail_ips|difference(used_jail_ips)|shuffle|first }}
+running_jail_ids: >-
+  {{ lookup('pipe', '/usr/sbin/jls -q name').split() }}
+
+ansible_roles_path: /usr/local/etc/ansible/roles
+
+default_timezone: Europe/Budapest
+
+jail_default_config_opts: |
+  mount.devfs=4;
+  devfs_ruleset=4;
+  enforce_statfs=2;
+  host=new;
+  ip4=disable;
+  ip6=disable;
+  securelevel=-1;
+  sysvmsg=disable;
+  sysvsem=disable;
+  sysvshm=disable;
+  allow.nochflags;
+  allow.nomount;
+  allow.mount.nodevfs;
+  allow.mount.nofdescfs;
+  allow.mount.nolinprocfs;
+  allow.mount.nolinsysfs;
+  allow.mount.nonullfs;
+  allow.mount.noprocfs;
+  allow.mount.notmpfs;
+  allow.mount.nozfs;
+  allow.noquotas;
+  allow.noraw_sockets;
+  allow.noset_hostname;
+  allow.nosocket_af;
+  allow.nosysvipc;
+  children.max=0;
+  host.domainname="";
+  host.hostid=0;
+  ip4.saddrsel;
+  ip6.addr="";
+  ip6.saddrsel;
+  exec.start="/bin/sh /etc/rc";
+  exec.stop="/bin/sh /etc/rc.shutdown";
+
+# DONT'T USE JAIL SPECIFIC VARIABLE VARIABLE ASSIGNMENTS HERE !!! ANSIBLE CAN'T RESOLVE THEM
+jail_name: MODIFY_ME
+jail_prefix: MODIFY-ME-
+jail_MODIFY_ME_force_recreate: false
+jail_MODIFY_ME_timezone: Europe/Budapest
+
+# Include file places, override in your role config with absolute paths to your tasks
+jail_include_noop: '{{ vars["ansible_roles_path"] }}/karolyi.freebsd-jailhost-tools/tasks/noop.yml'
