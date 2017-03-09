@@ -29,7 +29,6 @@
       {{ vars['jail_' + jail_name + '_newest_id'] }} {
           path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
           host.hostname={{ vars['jail_' + jail_name + '_newest_id'] }};
-          name={{ vars['jail_' + jail_name + '_newest_id'] }};
           ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip'] }}";
           {{
             vars["jail_" + jail_name + "_formatted_options"]
