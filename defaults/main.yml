@@ -77,4 +77,4 @@ jail_MODIFY_ME_force_recreate: false
 jail_MODIFY_ME_timezone: Europe/Budapest
 
 # Include file places, override in your role config with absolute paths to your tasks
-jail_include_noop: '{{ vars["ansible_roles_path"] }}/karolyi.freebsd-jailhost-tools/tasks/noop.yml'
+jail_include_noop: '{{ vars["ansible_roles_path"] }}/karolyi.ansible-freebsd-jailhost-tools/tasks/noop.yml'
