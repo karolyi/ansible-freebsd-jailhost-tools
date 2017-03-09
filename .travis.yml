@@ -2,6 +2,9 @@
 language: python
 python: "2.7"
 dist: trusty
+cache:
+  bundler: true
+  pip: true
 
 # Use the new container infrastructure
 sudo: false
@@ -14,7 +17,7 @@ addons:
 
 install:
   # Install ansible
-  - pip install ansible
+  - pip install -U ansible
 
   # Check ansible version
   - ansible --version
