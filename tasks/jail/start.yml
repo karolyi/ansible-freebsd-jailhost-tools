@@ -38,7 +38,7 @@
 
 - name: Flattening config into one variable
   set_fact: 
-    _iter_flattened_config: "{{ _iter_config_lines|join('\n    ') }}"
+    _iter_flattened_config: "{{ _iter_config_lines|sort|join('\n    ') }}"
 
 - name: Writing config block for {{ vars['jail_' + jail_name + '_newest_id'] }} into /etc/jail.conf
   blockinfile:

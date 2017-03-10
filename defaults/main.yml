@@ -27,7 +27,7 @@ valid_jail_ips: "{{ lookup('pipe', 'seq -f 127.0.0.%g 2 254').split() }}"
 used_jail_ips: >-
   {{ lookup('pipe', 'jls -q ip4.addr').split() }}
 available_jail_ip: >-
-  {{ valid_jail_ips|difference(used_jail_ips)|shuffle|first }}
+  {{ valid_jail_ips|difference(used_jail_ips)|first }}
 running_jail_ids: >-
   {{ lookup('pipe', '/usr/sbin/jls -q name').split() }}
 
@@ -36,7 +36,6 @@ ansible_roles_path: /usr/local/etc/ansible/roles
 default_timezone: Europe/Budapest
 
 jail_default_config_opts:
-  mount.devfs: 4
   devfs_ruleset: 4
   enforce_statfs: 2
   host: new
@@ -62,11 +61,13 @@ jail_default_config_opts:
   allow.socket_af: false
   allow.sysvipc: false
   children.max: 0
+  exec.clean: true
   host.domainname: ''
   host.hostid: 0
   ip4.saddrsel: ''
   ip6.addr: ''
   ip6.saddrsel: ''
+  mount.devfs: true
   exec.start: /bin/sh /etc/rc
   exec.stop: /bin/sh /etc/rc.shutdown
 
