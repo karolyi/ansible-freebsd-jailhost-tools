@@ -16,7 +16,29 @@
 
 - name: Formatting jail.conf options for {{ vars['jail_' + jail_name + '_newest_id'] }}
   set_fact:
-    '{{ "jail_" + jail_name + "_formatted_options" }}': "{{ '\n    '.join((vars['jail_' + jail_name + '_config_opts']|default(jail_default_config_opts)).split('\n')) }}"
+    _iter_config_opts: >-
+      {{
+        jail_default_config_opts | combine(
+          vars["jail_" + jail_name + "_config_opts"] |default({})
+        )
+      }}
+    _iter_config_lines: []
+
+- name: Converting config dict into config lines
+  set_fact:
+    _iter_config_lines: >-
+      {{ _iter_config_lines }} + {{
+        ['%s = %s;'|format(
+          item.key,
+          '"%s"'|format(item.value) if item.value is string else
+            item.value|ternary('"true"', '"false"') if item.value.__class__.__name__ == 'bool' else item.value
+        )]
+      }}
+  with_dict: '{{ _iter_config_opts }}'
+
+- name: Flattening config into one variable
+  set_fact: 
+    _iter_flattened_config: "{{ _iter_config_lines|join('\n    ') }}"
 
 - name: Writing config block for {{ vars['jail_' + jail_name + '_newest_id'] }} into /etc/jail.conf
   blockinfile:
@@ -28,11 +50,9 @@
     block: |
       {{ vars['jail_' + jail_name + '_newest_id'] }} {
           path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
-          host.hostname={{ vars['jail_' + jail_name + '_newest_id'] }};
+          host.hostname="{{ vars['jail_' + jail_name + '_newest_id'] }}";
           ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip'] }}";
-          {{
-            vars["jail_" + jail_name + "_formatted_options"]
-          }}
+          {{ _iter_flattened_config }}
       }
 
 - name: Starting jail

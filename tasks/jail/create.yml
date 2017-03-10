@@ -39,4 +39,27 @@
   command:
     /usr/sbin/tzsetup
     -C {{ vars['jail_' + jail_name + '_new_path'] }}
-    {{ vars['jail_' + jail_name + '_timezone'] }}
+    {{ vars['jail_' + jail_name + '_timezone'|default(vars['default_timezone'])] }}
+
+- name: Create config dir for jail
+  file:
+    path: '{{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}'
+    state: directory
+
+- name: Templating fstab for jail
+  template:
+    src: fstab.j2
+    dest: '{{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}/fstab'
+  register: fstab_init_result
+  failed_when: false
+  ignore_errors: yes
+  changed_when: fstab_init_result|succeeded
+
+- name: Adding fstab to jail startup
+  set_fact:
+    'jail_{{ jail_name }}_config_opts': >-
+      {{ vars["jail_" + jail_name + "_config_opts"]|default({})|combine(
+        {'mount.fstab': 
+          dynamic_jails_path + '/configs/' + vars['jail_' + jail_name + '_newest_id'] + '/fstab'}
+      )}}
+  when: fstab_init_result|changed

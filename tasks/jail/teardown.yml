@@ -45,3 +45,7 @@
     insertbefore: '^# vim: syn=conf$'
     marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ jail_id }}'
 
+- name: Delete config dir for jail
+  file:
+    path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'
+    state: absent

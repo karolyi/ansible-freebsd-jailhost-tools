@@ -35,40 +35,41 @@ ansible_roles_path: /usr/local/etc/ansible/roles
 
 default_timezone: Europe/Budapest
 
-jail_default_config_opts: |
-  mount.devfs=4;
-  devfs_ruleset=4;
-  enforce_statfs=2;
-  host=new;
-  ip4=disable;
-  ip6=disable;
-  securelevel=-1;
-  sysvmsg=disable;
-  sysvsem=disable;
-  sysvshm=disable;
-  allow.nochflags;
-  allow.nomount;
-  allow.mount.nodevfs;
-  allow.mount.nofdescfs;
-  allow.mount.nolinprocfs;
-  allow.mount.nolinsysfs;
-  allow.mount.nonullfs;
-  allow.mount.noprocfs;
-  allow.mount.notmpfs;
-  allow.mount.nozfs;
-  allow.noquotas;
-  allow.noraw_sockets;
-  allow.noset_hostname;
-  allow.nosocket_af;
-  allow.nosysvipc;
-  children.max=0;
-  host.domainname="";
-  host.hostid=0;
-  ip4.saddrsel;
-  ip6.addr="";
-  ip6.saddrsel;
-  exec.start="/bin/sh /etc/rc";
-  exec.stop="/bin/sh /etc/rc.shutdown";
+jail_default_config_opts:
+  mount.devfs: 4
+  devfs_ruleset: 4
+  enforce_statfs: 2
+  host: new
+  ip4: disable
+  ip6: disable
+  securelevel: -1
+  sysvmsg: disable
+  sysvsem: disable
+  sysvshm: disable
+  allow.chflags: false
+  allow.mount: false
+  allow.mount.devfs: false
+  allow.mount.fdescfs: false
+  allow.mount.linprocfs: false
+  allow.mount.linsysfs: false
+  allow.mount.nullfs: false
+  allow.mount.procfs: false
+  allow.mount.tmpfs: false
+  allow.mount.zfs: false
+  allow.quotas: false
+  allow.raw_sockets: false
+  allow.set_hostname: false
+  allow.socket_af: false
+  allow.sysvipc: false
+  children.max: 0
+  host.domainname: ''
+  host.hostid: 0
+  ip4.saddrsel: ''
+  ip6.addr: ''
+  ip6.saddrsel: ''
+  exec.start: /bin/sh /etc/rc
+  exec.stop: /bin/sh /etc/rc.shutdown
+
 
 # DONT'T USE JAIL SPECIFIC VARIABLE VARIABLE ASSIGNMENTS HERE !!! ANSIBLE CAN'T RESOLVE THEM
 jail_name: MODIFY_ME
