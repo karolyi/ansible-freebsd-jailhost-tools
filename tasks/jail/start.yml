@@ -1,4 +1,4 @@
-- name: Put syslog jail IP into /etc/hosts
+- name: Put {{ jail_name }} jail IP into /etc/hosts
   lineinfile:
     dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc/hosts'
     # Hostname + 2 tabulators here

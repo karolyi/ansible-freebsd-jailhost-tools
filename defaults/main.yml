@@ -22,6 +22,9 @@ dynamic_jails_dataset_name: >-
   {{ zroot_name }}/dynamic-jails-root
 dynamic_jails_path: >-
   {{ jail_path }}/dynamic-jails
+pf_include_macros_path: '{{ dynamic_jails_path }}/configs/pf-include-macros.conf'
+pf_include_translation_path: '{{ dynamic_jails_path }}/configs/pf-include-translation.conf'
+pf_include_filtering_path: '{{ dynamic_jails_path }}/configs/pf-include-filtering.conf'
 
 valid_jail_ips: "{{ lookup('pipe', 'seq -f 127.0.0.%g 2 254').split() }}"
 used_jail_ips: >-
