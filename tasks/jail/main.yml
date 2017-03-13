@@ -17,7 +17,9 @@
     path: '{{ dynamic_jails_path }}/configs'
     state: directory
 
-
+# ---
+# Run CREATE when forced or no existing dir
+# ---
 - block:
   - include: '{{ vars["jail_" + jail_name + "_include_createnew_precreate"] | default(jail_include_noop) }}'
     vars:
@@ -51,10 +53,15 @@
   set_fact:
     jail_{{ jail_name }}_run_update: '{{ not vars["jail_" + jail_name + "_is_new_created"] }}'
 
+# ---
+# Run UPDATE when not created
+# ---
 - name: Checking the latest {{ jail_name }} jail, updating/replacing when necessary
   include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/update.yml'
   when: '{{ vars["jail_" + jail_name + "_run_update"] }}'
 
+
+# Remove the latest directory for tidyup
 - name: Updating jail_{{ jail_name }}_existing_dirs when necessary
   set_fact:
     jail_{{ jail_name }}_existing_dirs: '{{ vars["jail_" + jail_name + "_existing_dirs"][1:] }}'

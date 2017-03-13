@@ -63,3 +63,14 @@
           dynamic_jails_path + '/configs/' + vars['jail_' + jail_name + '_newest_id'] + '/fstab'}
       )}}
   when: fstab_init_result|changed
+
+- name: Updating jails.ini
+  blockinfile:
+    create: yes
+    dest: '{{ dynamic_jails_path }}/configs/jails.ini'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ jail_name }}'
+    block: |
+      [{{ jail_name }}]
+      name = {{ vars['jail_' +  jail_name + '_newest_id'] }}
+      ip4_addr = {{ vars['jail_' + jail_name + '_new_ip'] }}
+

@@ -14,6 +14,9 @@
         vars['jail_' + jail_name + '_existing_dirs'][0]
       }}
 
+# ---
+# UPDATING the existing jail when the base system is not outdated
+# ---
 - block:
 
   - name: Check if packages have to be upgraded
@@ -39,6 +42,10 @@
   when: '{{ not vars["jail_" + jail_name + "_must_replace"] }}'
 
 
+
+# ---
+# CREATING a new jail when the base system is outdated
+# ---
 - block:
 
   - include: '{{ vars["jail_" + jail_name + "_include_update_precreate"] | default(jail_include_noop) }}'
@@ -52,7 +59,7 @@
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_update_prestart" }}'
 
-  - name: Starting the new jail_syslog
+  - name: Starting the new {{ jail_name }} jail
     include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/start.yml'
 
   - include: '{{ vars["jail_" + jail_name + "_include_update_poststart"] | default(jail_include_noop) }}'
