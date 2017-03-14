@@ -1,3 +1,8 @@
+- name: Fail when jail_id not specified
+  fail:
+    msg: jail_id must be defined for teardown.yml, bailing out
+  when: '{{ jail_id|default(False) == False }}'
+
 - name: Check if the jail {{ jail_id }} runs
   set_fact:
     jail_is_old_running: >-
@@ -7,6 +12,14 @@
   command:
     /usr/sbin/jail -r {{ jail_id }}
   when: jail_is_old_running
+
+- name: Removing config block for {{ jail_id }} from /etc/jail.conf
+  blockinfile:
+    state: absent
+    dest: '/etc/jail.conf'
+    # Keep this line at the bottom so vim can use proper syntax higlighting
+    insertbefore: '^# vim: syn=conf$'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ jail_id }}'
 
 - name: Getting mounts under this jail
   shell:
@@ -25,11 +38,26 @@
   loop_control:
     loop_var: mountpoint
 
-- name: Destroying ZFS mount
+- name: Delete config dir for jail
+  file:
+    path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'
+    state: absent
+
+- name: Destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }}
   zfs:
     name: >-
       {{ dynamic_jails_dataset_name }}/{{ jail_id }}
     state: absent
+  register: zfs_destroy
+  ignore_errors: yes
+
+# Due to a possible bug in the ZFS/FreeBSD kernel, destroying the dataset
+# sometimes isn't possible after freeing it up. Hence we use '-f'
+- name: Force-destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }} because it failed formerly
+  command:
+    /sbin/zfs destroy -f
+    {{ dynamic_jails_dataset_name }}/{{ jail_id }}
+  when: zfs_destroy | failed
 
 - name: Removing jail directory
   file:
@@ -37,15 +65,3 @@
       {{ dynamic_jails_path }}/{{ jail_id }}
     state: absent
 
-- name: Removing config block for {{ jail_id }} from /etc/jail.conf
-  blockinfile:
-    state: absent
-    dest: '/etc/jail.conf'
-    # Keep this line at the bottom so vim can use proper syntax higlighting
-    insertbefore: '^# vim: syn=conf$'
-    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ jail_id }}'
-
-- name: Delete config dir for jail
-  file:
-    path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'
-    state: absent
