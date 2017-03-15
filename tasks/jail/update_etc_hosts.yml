@@ -18,3 +18,8 @@
   with_items: '{{ matching_hosts_files.stdout_lines }}'
   loop_control:
     loop_var: filename
+
+- name: Sending HUP to any dnsmasq process to reload their /etc/hosts
+  command:
+    /usr/bin/killall -HUP dnsmasq
+  failed_when: false
