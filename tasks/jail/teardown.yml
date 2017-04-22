@@ -1,7 +1,11 @@
+- name: Setting default facts check for teardown
+  set_fact:
+    jail_is_no_jail_id: '{{ jail_id|default(False) == False }}'
+
 - name: Fail when jail_id not specified
   fail:
     msg: jail_id must be defined for teardown.yml, bailing out
-  when: '{{ jail_id|default(False) == False }}'
+  when: jail_is_no_jail_id
 
 - name: Check if the jail {{ jail_id }} runs
   set_fact:
@@ -29,11 +33,15 @@
     warn=no
   register: mounts_under_jail
 
+- name: Setting this jail's root mount point
+  set_fact:
+    _iter_mount_point: '{{ dynamic_jails_path + "/" + jail_id }}'
+
 - name: Unmounting all mounts from under the jail so it could be destroyed
   command:
     /sbin/umount
     '{{ mountpoint }}'
-  when: '{{ mountpoint != dynamic_jails_path + "/" + jail_id }}'
+  when: mountpoint != _iter_mount_point
   with_items: '{{ mounts_under_jail.stdout_lines|sort(reverse=True) }}'
   loop_control:
     loop_var: mountpoint
@@ -57,7 +65,7 @@
   command:
     /sbin/zfs destroy -f
     {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-  when: zfs_destroy | failed
+  when: 'zfs_destroy | failed and ": Device busy" in zfs_destroy.msg'
 
 - name: Removing jail directory
   file:

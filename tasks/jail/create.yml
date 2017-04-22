@@ -11,7 +11,7 @@
 
 - name: Set other variables for the create
   set_fact:
-    jail_{{ jail_name }}_is_new_created: true
+    jail_THIS_is_new_created: true
     jail_{{ jail_name }}_new_dataset_name:
       '{{ dynamic_jails_dataset_name }}/{{ vars["jail_" + jail_name + "_newest_id"] }}'
     jail_{{ jail_name }}_new_path:

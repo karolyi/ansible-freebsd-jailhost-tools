@@ -1,6 +1,6 @@
 - name: Looking up if the {{ jail_name }} jail needs to be replaced, setting up variables
   set_fact:
-    jail_{{ jail_name }}_must_replace: >-
+    jail_THIS_must_replace: >-
       {{
         lookup(
           'pipe', '/usr/sbin/chroot ' +
@@ -39,7 +39,7 @@
       upgrade -y
     when: '{{ vars["jail_" + jail_name + "_pkgs"] | changed }}'
 
-  when: '{{ not vars["jail_" + jail_name + "_must_replace"] }}'
+  when: jail_THIS_must_replace
 
 
 
@@ -66,7 +66,7 @@
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_update_poststart" }}'
 
-  when: '{{ vars["jail_" + jail_name + "_must_replace"] }}'
+  when: jail_THIS_must_replace
 
 
 

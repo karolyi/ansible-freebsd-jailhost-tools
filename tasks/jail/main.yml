@@ -9,8 +9,16 @@
 
 - name: Set default facts for the task
   set_fact:
-    jail_{{ jail_name }}_is_new_created: false
+    jail_THIS_is_new_created: false
     jail_{{ jail_name }}_existing_dirs: '{{ dirs_found.files | map(attribute="path") | map("basename") | sort(reverse=True) }}'
+
+- name: Setting other defaults for this task depending on formerly set variables
+  set_fact:
+    jail_THIS_run_create: >-
+      {{
+        vars["jail_" + jail_name + "_existing_dirs"] | count == 0 or
+        vars["jail_" + jail_name + "_force_recreate"]
+      }}
 
 - name: Ensure config directory exists for the generated jails
   file:
@@ -39,33 +47,29 @@
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_createnew_poststart" }}'
 
-  when: >-
-    {{
-      vars["jail_" + jail_name + "_existing_dirs"] | count == 0 or
-      vars["jail_" + jail_name + "_force_recreate"]
-    }}
+  when: jail_THIS_run_create
 
 
-# This task here is to set a boolean to this 'level', since the jail_{{ jail_name }}_is_new_created is used elsewhere too.
+# This task here is to set a boolean to this 'level', since the jail_THIS_is_new_created is used elsewhere too.
 # When we change that variable elsewhere downwards, the tasks could get skipped because the 'when' statements
 # are dynamically evaluated.
 - name: Set if the {{ jail_name }} jail has to be updated or a new has been created.
   set_fact:
-    jail_{{ jail_name }}_run_update: '{{ not vars["jail_" + jail_name + "_is_new_created"] }}'
+    jail_THIS_run_update: '{{ not jail_THIS_is_new_created }}'
 
 # ---
 # Run UPDATE when not created
 # ---
 - name: Checking the latest {{ jail_name }} jail, updating/replacing when necessary
   include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/update.yml'
-  when: '{{ vars["jail_" + jail_name + "_run_update"] }}'
+  when: jail_THIS_run_update
 
 
 # Remove the latest directory for tidyup
 - name: Updating jail_{{ jail_name }}_existing_dirs when necessary
   set_fact:
     jail_{{ jail_name }}_existing_dirs: '{{ vars["jail_" + jail_name + "_existing_dirs"][1:] }}'
-  when: '{{ not vars["jail_" + jail_name + "_is_new_created"] }}'
+  when: not jail_THIS_is_new_created
 
 - name: Tidying up remaining unused jails
   include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/teardown.yml jail_id={{ item }}'

@@ -4,7 +4,7 @@
   command: >-
     /bin/sh -c "/usr/bin/grep -lE
     '^[0-9]+.[0-9]+.[0-9]+.[0-9]+		jail_{{ jail_name }}'
-    /usr/jails/*/etc/hosts {{ dynamic_jails_path }}/*/etc/hosts"
+    /etc/hosts /usr/jails/*/etc/hosts {{ dynamic_jails_path }}/*/etc/hosts"
   ignore_errors: yes
   failed_when: false
   register: matching_hosts_files
@@ -19,7 +19,7 @@
   loop_control:
     loop_var: filename
 
-- name: Sending HUP to any dnsmasq process to reload their /etc/hosts
+- name: Sending HUP to any any crucial processes to reload their /etc/hosts
   command:
-    /usr/bin/killall -HUP dnsmasq
+    /usr/bin/killall -HUP dnsmasq syslogd
   failed_when: false
