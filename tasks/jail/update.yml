@@ -37,7 +37,7 @@
       /usr/sbin/pkg
       -j {{ vars['jail_' + jail_name + '_newest_id'] }}
       upgrade -y
-    when: '{{ vars["jail_" + jail_name + "_pkgs"] | changed }}'
+    when: jail_pkgs | changed
 
   when: jail_THIS_must_replace
 
