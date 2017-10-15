@@ -29,21 +29,21 @@
 # Run CREATE when forced or no existing dir
 # ---
 - block:
-  - include: '{{ vars["jail_" + jail_name + "_include_createnew_precreate"] | default(jail_include_noop) }}'
+  - include_tasks: '{{ vars["jail_" + jail_name + "_include_createnew_precreate"] | default(jail_include_noop) }}'
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_createnew_precreate" }}'
 
   - name: Creating a {{ jail_name }} jail when there's none yet
-    include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/create.yml'
+    include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/create.yml'
 
-  - include: '{{ vars["jail_" + jail_name + "_include_createnew_prestart"] | default(jail_include_noop) }}'
+  - include_tasks: '{{ vars["jail_" + jail_name + "_include_createnew_prestart"] | default(jail_include_noop) }}'
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_createnew_prestart" }}'
 
   - name: Starting the {{ jail_name }} jail
-    include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/start.yml'
+    include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/start.yml'
 
-  - include: '{{ vars["jail_" + jail_name + "_include_createnew_poststart"] | default(jail_include_noop) }}'
+  - include_tasks: '{{ vars["jail_" + jail_name + "_include_createnew_poststart"] | default(jail_include_noop) }}'
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_createnew_poststart" }}'
 
@@ -61,7 +61,7 @@
 # Run UPDATE when not created
 # ---
 - name: Checking the latest {{ jail_name }} jail, updating/replacing when necessary
-  include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/update.yml'
+  include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/update.yml'
   when: jail_THIS_run_update
 
 
@@ -72,7 +72,7 @@
   when: not jail_THIS_is_new_created
 
 - name: Tidying up remaining unused jails
-  include: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/teardown.yml jail_id={{ item }}'
+  include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/teardown.yml jail_id={{ item }}'
   with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
 
 
