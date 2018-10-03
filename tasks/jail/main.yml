@@ -50,6 +50,7 @@
   - include_tasks: '{{ vars["jail_" + jail_name + "_include_createnew_poststart"] | default(jail_include_noop) }}'
     vars:
       include_type: '{{ "jail_" + jail_name + "_include_createnew_poststart" }}'
+    when: not jail_THIS_with_ip6
 
   when: jail_THIS_run_create
 
@@ -80,11 +81,17 @@
   with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
 
 
-- name: Starting jail when IPv6 present
-  command:
-    jail -c
-    {{
-      vars['jail_' + jail_name + '_newest_id']
-    }}
-  when: 'jail_THIS_with_ip6 != False'
+- block:
+  - name: Starting jail when IPv6 present
+    command:
+      jail -c
+      {{
+        vars['jail_' + jail_name + '_newest_id']
+      }}
+
+  - include_tasks: '{{ vars["jail_" + jail_name + "_include_createnew_poststart"] | default(jail_include_noop) }}'
+    vars:
+      include_type: '{{ "jail_" + jail_name + "_include_createnew_poststart" }}'
+
+  when: 'jail_THIS_with_ip6 != False and jail_THIS_run_create == True'
 
