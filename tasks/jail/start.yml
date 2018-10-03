@@ -24,7 +24,7 @@
   set_fact: 
     _iter_flattened_config: "{{ _iter_config_lines|sort|join('\n    ') }}"
 
-- name: Writing config block for {{ vars['jail_' + jail_name + '_newest_id'] }} into /etc/jail.conf
+- name: Writing config block for {{ vars['jail_' + jail_name + '_newest_id'] }} into /etc/jail.conf (IPv4)
   blockinfile:
     create: yes
     state: present
@@ -35,14 +35,32 @@
       {{ vars['jail_' + jail_name + '_newest_id'] }} {
           path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
           host.hostname="{{ vars['jail_' + jail_name + '_newest_id'] }}";
-          ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip'] }}";
+          ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip4'] }}"/32;
           {{ _iter_flattened_config }}
       }
+  when: not jail_THIS_with_ip6
 
-- name: Starting jail
+- name: Writing config block for {{ vars['jail_' + jail_name + '_newest_id'] }} into /etc/jail.conf (IPv4+6)
+  blockinfile:
+    create: yes
+    state: present
+    dest: '/etc/jail.conf'
+    insertbefore: '^# vim: syn=conf$'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK: {{ vars["jail_" +  jail_name + "_newest_id"] }}'
+    block: |
+      {{ vars['jail_' + jail_name + '_newest_id'] }} {
+          path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
+          host.hostname="{{ vars['jail_' + jail_name + '_newest_id'] }}";
+          ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip4'] }}/32";
+          ip6.addr="bridge0|{{ vars['jail_' + jail_name + '_ip6'] }}/128";
+          {{ _iter_flattened_config }}
+      }
+  when: 'jail_THIS_with_ip6 != False'
+
+- name: Starting jail when no IPv6 present
   command:
     jail -c
     {{
       vars['jail_' + jail_name + '_newest_id']
     }}
-
+  when: not jail_THIS_with_ip6

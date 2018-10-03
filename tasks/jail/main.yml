@@ -20,6 +20,10 @@
         vars["jail_" + jail_name + "_force_recreate"]
       }}
 
+- name: Checking if an IPv6 address is assigned
+  set_fact:
+    jail_THIS_with_ip6: "{{ vars['jail_' + jail_name + '_ip6'] | default(False) }}"
+
 - name: Ensure config directory exists for the generated jails
   file:
     path: '{{ dynamic_jails_path }}/configs'
@@ -65,7 +69,7 @@
   when: jail_THIS_run_update
 
 
-# Remove the latest directory for tidyup
+# Remove the latest directory for tidyup when in update mode
 - name: Updating jail_{{ jail_name }}_existing_dirs when necessary
   set_fact:
     jail_{{ jail_name }}_existing_dirs: '{{ vars["jail_" + jail_name + "_existing_dirs"][1:] }}'
@@ -75,4 +79,12 @@
   include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/teardown.yml jail_id={{ item }}'
   with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
 
+
+- name: Starting jail when IPv6 present
+  command:
+    jail -c
+    {{
+      vars['jail_' + jail_name + '_newest_id']
+    }}
+  when: 'jail_THIS_with_ip6 != False'
 

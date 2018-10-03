@@ -1,11 +1,11 @@
 ---
-zroot_name: tank/root
+zroot_name: zroot/jails
 template_dataset_name: >-
-  {{ zroot_name }}/templatejail
+  {{ zroot_name }}/template
 template_dataset_root_name: >-
   {{ template_dataset_name }}/root
 
-jail_path: /usr/jails
+jail_path: /jails
 template_jail_path: >-
   {{ jail_path|quote }}/template
 template_jail_root_path: >-
@@ -19,67 +19,69 @@ latest_snapshot: >-
   }}
 
 dynamic_jails_dataset_name: >-
-  {{ zroot_name }}/dynamic-jails-root
+  {{ zroot_name }}/dynamic
 dynamic_jails_path: >-
-  {{ jail_path }}/dynamic-jails
+  {{ jail_path }}/dynamic
+static_jails_path: >-
+  {{ jail_path }}/static
 pf_include_macros_path: '{{ dynamic_jails_path }}/configs/pf-include-macros.conf'
 pf_include_translation_path: '{{ dynamic_jails_path }}/configs/pf-include-translation.conf'
 pf_include_filtering_path: '{{ dynamic_jails_path }}/configs/pf-include-filtering.conf'
 
-valid_jail_ips: "{{ lookup('pipe', 'seq -f 127.0.0.%g 2 254').split() }}"
-used_jail_ips: >-
+valid_jail_ip4s: "{{ lookup('pipe', 'seq -f 127.0.0.%g 2 254').split() }}"
+used_jail_ip4s: >-
   {{ lookup('pipe', 'jls -q ip4.addr').split() }}
-available_jail_ip: >-
-  {{ valid_jail_ips|difference(used_jail_ips)|first }}
+available_jail_ip4: >-
+  {{ valid_jail_ip4s|difference(used_jail_ip4s)|first }}
 running_jail_ids: >-
   {{ lookup('pipe', '/usr/sbin/jls -q name').split() }}
 
 ansible_roles_path: /usr/local/etc/ansible/roles
 
-default_timezone: Europe/Budapest
+default_timezone: Europe/Berlin
 
 jail_default_config_opts:
   devfs_ruleset: 4
   enforce_statfs: 2
-  host: new
-  ip4: disable
-  ip6: disable
-  securelevel: -1
-  sysvmsg: disable
-  sysvsem: disable
-  sysvshm: disable
-  allow.chflags: false
-  allow.mount: false
-  allow.mount.devfs: false
-  allow.mount.fdescfs: false
-  allow.mount.linprocfs: false
-  allow.mount.linsysfs: false
-  allow.mount.nullfs: false
-  allow.mount.procfs: false
-  allow.mount.tmpfs: false
-  allow.mount.zfs: false
-  allow.quotas: false
-  allow.raw_sockets: false
-  allow.set_hostname: false
-  allow.socket_af: false
-  allow.sysvipc: false
-  children.max: 0
-  exec.clean: true
-  host.domainname: ''
-  host.hostid: 0
-  ip4.saddrsel: ''
-  ip6.addr: ''
-  ip6.saddrsel: ''
-  mount.devfs: true
-  exec.start: /bin/sh /etc/rc
-  exec.stop: /bin/sh /etc/rc.shutdown
+#  host: new
+#  ip4: disable
+#  ip6: disable
+#  securelevel: -1
+#  sysvmsg: disable
+#  sysvsem: disable
+#  sysvshm: disable
+#  allow.chflags: false
+#  allow.mount: false
+#  allow.mount.devfs: false
+#  allow.mount.fdescfs: false
+#  allow.mount.linprocfs: false
+#  allow.mount.linsysfs: false
+#  allow.mount.nullfs: false
+#  allow.mount.procfs: false
+#  allow.mount.tmpfs: false
+#  allow.mount.zfs: false
+#  allow.quotas: false
+#  allow.raw_sockets: false
+#  allow.set_hostname: false
+#  allow.socket_af: false
+#  allow.sysvipc: false
+#  children.max: 0
+#  exec.clean: true
+#  host.domainname: ''
+#  host.hostid: 0
+#  ip4.saddrsel: ''
+#  ip6.addr: ''
+#  ip6.saddrsel: ''
+#  mount.devfs: true
+#  exec.start: /bin/sh /etc/rc
+#  exec.stop: /bin/sh /etc/rc.shutdown
 
 
 # DONT'T USE JAIL SPECIFIC VARIABLE VARIABLE ASSIGNMENTS HERE !!! ANSIBLE CAN'T RESOLVE THEM
 jail_name: MODIFY_ME
 jail_prefix: MODIFY-ME-
 jail_MODIFY_ME_force_recreate: false
-jail_MODIFY_ME_timezone: Europe/Budapest
+jail_MODIFY_ME_timezone: Europe/Berlin
 
 # Include file places, override in your role config with absolute paths to your tasks
 jail_include_noop: '{{ vars["ansible_roles_path"] }}/karolyi.ansible-freebsd-jailhost-tools/tasks/noop.yml'

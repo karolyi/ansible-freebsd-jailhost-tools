@@ -35,13 +35,13 @@
 
 - name: Setting this jail's root mount point
   set_fact:
-    _iter_mount_point: '{{ dynamic_jails_path + "/" + jail_id }}'
+    _root_mount_point: '{{ dynamic_jails_path + "/" + jail_id }}'
 
 - name: Unmounting all mounts from under the jail so it could be destroyed
   command:
     /sbin/umount
     '{{ mountpoint }}'
-  when: mountpoint != _iter_mount_point
+  when: mountpoint != _root_mount_point
   with_items: '{{ mounts_under_jail.stdout_lines|sort(reverse=True) }}'
   loop_control:
     loop_var: mountpoint
@@ -65,7 +65,7 @@
   command:
     /sbin/zfs destroy -f
     {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-  when: 'zfs_destroy | failed and ": Device busy" in zfs_destroy.msg'
+  when: 'zfs_destroy is failed and ": Device busy" in zfs_destroy.msg'
 
 - name: Removing jail directory
   file:
