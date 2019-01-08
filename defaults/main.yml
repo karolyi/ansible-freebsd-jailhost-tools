@@ -43,7 +43,9 @@ default_timezone: Europe/Berlin
 jail_default_config_opts:
   devfs_ruleset: 4
   enforce_statfs: 2
-#  host: new
+  host.hostname: jail-{{ jail_name }}
+  host.domainname: ''
+  host.hostid: 0
 #  ip4: disable
 #  ip6: disable
 #  securelevel: -1
@@ -67,8 +69,6 @@ jail_default_config_opts:
 #  allow.sysvipc: false
 #  children.max: 0
 #  exec.clean: true
-#  host.domainname: ''
-#  host.hostid: 0
 #  ip4.saddrsel: ''
 #  ip6.addr: ''
 #  ip6.saddrsel: ''
