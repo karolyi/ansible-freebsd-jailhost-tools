@@ -31,10 +31,26 @@
     src: rc.conf
     dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc'
 
+- name: Templating resolv.conf for jail
+  template:
+    src: resolv.conf.j2
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc/resolv.conf'
+  register: template_resolv
+  ignore_errors: yes
+
+- name: Copy local resolv.conf over to the new jail
+  copy:
+    src: resolv.conf
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc'
+  register: local_resolv
+  ignore_errors: yes
+  when: template_resolv is failed
+
 - name: Copy resolv.conf over to the new jail
   copy:
     src: /etc/resolv.conf
     dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc'
+  when: local_resolv is failed
 
 - name: Setup timezone in jail
   command:
