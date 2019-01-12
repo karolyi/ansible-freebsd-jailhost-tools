@@ -34,7 +34,7 @@
     block: |
       {{ vars['jail_' + jail_name + '_newest_id'] }} {
           path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
-          host.hostname="{{ vars['jail_' + jail_name + '_newest_id'] }}";
+          host.hostname="jail-{{ vars['jail_' + jail_name + '_newest_id'] }}";
           ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip4'] }}"/32;
           {{ _iter_flattened_config }}
       }
@@ -50,7 +50,7 @@
     block: |
       {{ vars['jail_' + jail_name + '_newest_id'] }} {
           path="{{ vars['jail_' + jail_name + '_new_path']|quote }}";
-          host.hostname="{{ vars['jail_' + jail_name + '_newest_id'] }}";
+          host.hostname="jail-{{ vars['jail_' + jail_name + '_newest_id'] }}";
           ip4.addr="lo0|{{ vars['jail_' + jail_name + '_new_ip4'] }}/32";
           ip6.addr="bridge0|{{ vars['jail_' + jail_name + '_ip6'] }}/128";
           {{ _iter_flattened_config }}
