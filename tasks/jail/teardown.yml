@@ -46,6 +46,11 @@
   loop_control:
     loop_var: mountpoint
 
+- name: Delete syslog socket
+  file:
+    path: '{{ dynamic_jails_path }}/{{ jail_id }}/var/run/log'
+    state: absent
+
 - name: Delete config dir for jail
   file:
     path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'

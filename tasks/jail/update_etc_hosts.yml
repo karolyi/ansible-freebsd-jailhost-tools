@@ -43,5 +43,11 @@
 
 - name: Sending HUP to any any crucial processes to reload their /etc/hosts
   command:
-    /usr/bin/killall -HUP dnsmasq syslogd nginx
+    /usr/bin/killall -HUP dnsmasq
   failed_when: false
+
+- name: Restarting syslog to put its log socket into the new jail
+  service:
+    name: syslogd
+    state: restarted
+ 
