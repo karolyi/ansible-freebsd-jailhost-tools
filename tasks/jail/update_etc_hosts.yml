@@ -3,7 +3,7 @@
 - name: Getting matching /etc/hosts files (IPv4)
   command: >-
     /bin/sh -c "/usr/bin/grep -lE
-    '^[0-9]+.[0-9]+.[0-9]+.[0-9]+		jail-{{ jail_name }}'
+    '^[0-9]+.[0-9]+.[0-9]+.[0-9]+		jail-{{ jail_name.replace("_", "-") }}'
     /etc/hosts {{ static_jails_path }}/*/etc/hosts {{ dynamic_jails_path }}/*/etc/hosts"
   ignore_errors: yes
   failed_when: false
@@ -12,8 +12,8 @@
 - name: Replacing appropriate jail names with new IP addresses in /etc/hosts files (IPv4)
   lineinfile:
     dest: '{{ filename }}'
-    regexp: '^\d+\.\d+\.\d+\.\d+		jail-{{ jail_name }}'
-    line: '{{ vars["jail_" + jail_name + "_new_ip4"] }}		jail-{{ jail_name }}'
+    regexp: '^\d+\.\d+\.\d+\.\d+		jail-{{ jail_name.replace("_", "-") }}'
+    line: '{{ vars["jail_" + jail_name + "_new_ip4"] }}		jail-{{ jail_name.replace("_", "-") }}'
     state: present
   with_items: '{{ matching_hosts_files_v4.stdout_lines }}'
   loop_control:
@@ -24,7 +24,7 @@
   - name: Getting matching /etc/hosts files (IPv6)
     command: >-
       /bin/sh -c "/usr/bin/grep -lE
-      '^[0-9a-f:]+		jail-{{ jail_name }}'
+      '^[0-9a-f:]+		jail-{{ jail_name.replace("_", "-") }}'
       /etc/hosts {{ static_jails_path }}/*/etc/hosts {{ dynamic_jails_path }}/*/etc/hosts"
     ignore_errors: yes
     failed_when: false
@@ -33,8 +33,8 @@
   - name: Replacing appropriate jail names with new IP addresses in /etc/hosts files (IPv6)
     lineinfile:
       dest: '{{ filename }}'
-      regexp: '^[0-9a-f:]+		jail-{{ jail_name }}'
-      line: '{{ jail_THIS_with_ip6 }}		jail-{{ jail_name }}'
+      regexp: '^[0-9a-f:]+		jail-{{ jail_name.replace("_", "-") }}'
+      line: '{{ jail_THIS_with_ip6 }}		jail-{{ jail_name.replace("_", "-") }}'
       state: present
     with_items: '{{ matching_hosts_files_v6.stdout_lines }}'
     loop_control:
