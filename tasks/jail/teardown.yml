@@ -71,3 +71,4 @@
       {{ dynamic_jails_path }}/{{ jail_id }}
     state: absent
 
+# vim: sw=2

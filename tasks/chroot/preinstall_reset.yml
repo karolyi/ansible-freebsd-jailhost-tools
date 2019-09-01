@@ -1,0 +1,11 @@
+- name: Unmounting devFS from chroot
+  mount:
+    path: '{{ vars["jail_" + jail_name + "_new_path"] }}/dev'
+    state: unmounted
+
+- name: Create resolv.conf for live usage in jail
+  copy:
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc/resolv.conf'
+    content: |
+      nameserver {{ vars["jail_" + jail_name + "_new_ip4"] }}
+

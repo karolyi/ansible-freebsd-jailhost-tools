@@ -83,6 +83,9 @@
     loop_control:
       loop_var: jail_id
 
+  - name: Reload PF
+    command: /sbin/pfctl -f /etc/pf.conf
+
   - name: Starting jail when IPv6 present
     command:
       jail -c
@@ -102,4 +105,4 @@
   loop_control:
     loop_var: jail_id
 
-
+# vim: sw=2

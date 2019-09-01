@@ -1,0 +1,28 @@
+- name: Create local repo config dir
+  file:
+    path: '{{ vars["jail_" + jail_name + "_new_path"] }}/usr/local/etc/pkg/repos'
+    state: directory
+
+- name: Copy FreeBSD repo config in place
+  copy:
+    src: FreeBSD.conf
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/usr/local/etc/pkg/repos/FreeBSD.conf'
+
+- name: Create resolv.conf for install usage in jail
+  copy:
+    dest: '{{ vars["jail_" + jail_name + "_new_path"] }}/etc/resolv.conf'
+    content: |
+      nameserver 127.0.0.1
+
+- name: Mounting devFS into chroot for pkg
+  mount:
+    src: devfs
+    path: '{{ vars["jail_" + jail_name + "_new_path"] }}/dev'
+    fstype: devfs
+    state: mounted
+
+- name: Restarting syslog
+  service:
+    name: syslogd
+    state: restarted
+

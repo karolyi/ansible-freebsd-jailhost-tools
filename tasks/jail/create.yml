@@ -104,3 +104,4 @@
       ip6_addr = {{ jail_THIS_with_ip6 }}
   when: 'jail_THIS_with_ip6 != False'
 
+# vim: sw=2
