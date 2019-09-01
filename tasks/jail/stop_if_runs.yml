@@ -1,0 +1,11 @@
+- name: Check if the jail {{ jail_id }} runs
+  set_fact:
+    jail_is_old_running: >-
+      {{ jail_id in running_jail_ids }}
+
+- name: Terminating jail when running
+  command:
+    /usr/sbin/jail -r {{ jail_id }}
+  when: jail_is_old_running
+
+

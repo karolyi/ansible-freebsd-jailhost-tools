@@ -41,7 +41,7 @@
       loop_var: filename
   when: 'jail_THIS_with_ip6 != False'
 
-- name: Sending HUP to any any crucial processes to reload their /etc/hosts
+- name: Sending HUP to any any crucial processes to reload their configuration
   command:
     /usr/bin/killall -HUP dnsmasq
   failed_when: false

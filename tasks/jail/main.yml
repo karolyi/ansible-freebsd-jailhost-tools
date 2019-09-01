@@ -76,14 +76,13 @@
     jail_{{ jail_name }}_existing_dirs: '{{ vars["jail_" + jail_name + "_existing_dirs"][1:] }}'
   when: not jail_THIS_is_new_created
 
-- name: Tidying up remaining unused jails
-  include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/teardown.yml'
-  with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
-  loop_control:
-    loop_var: jail_id
-
-
 - block:
+  - name: Stopping every running jail with this prefix
+    include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/stop_if_runs.yml'
+    with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
+    loop_control:
+      loop_var: jail_id
+
   - name: Starting jail when IPv6 present
     command:
       jail -c
@@ -96,4 +95,11 @@
       include_type: '{{ "jail_" + jail_name + "_include_createnew_poststart" }}'
 
   when: 'jail_THIS_with_ip6 != False and jail_THIS_run_create == True'
+
+- name: Tidying up remaining unused jails
+  include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/teardown.yml'
+  with_items: '{{ vars["jail_" + jail_name + "_existing_dirs"] }}'
+  loop_control:
+    loop_var: jail_id
+
 

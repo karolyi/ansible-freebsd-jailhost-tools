@@ -7,15 +7,8 @@
     msg: jail_id must be defined for teardown.yml, bailing out
   when: jail_is_no_jail_id
 
-- name: Check if the jail {{ jail_id }} runs
-  set_fact:
-    jail_is_old_running: >-
-      {{ jail_id in running_jail_ids }}
-
-- name: Terminating jail when running
-  command:
-    /usr/sbin/jail -r {{ jail_id }}
-  when: jail_is_old_running
+- name: Stop jail if it runs
+  include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/stop_if_runs.yml'
 
 - name: Removing config block for {{ jail_id }} from /etc/jail.conf
   blockinfile:
