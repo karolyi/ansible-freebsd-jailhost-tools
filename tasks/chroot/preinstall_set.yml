@@ -21,11 +21,6 @@
     fstype: devfs
     state: mounted
 
-- name: Restarting syslog
-  service:
-    name: syslogd
-    state: restarted
-
 - name: Mounting directories
   command:
     /sbin/mount
@@ -33,4 +28,9 @@
     {{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}/fstab
   args:
     warn: no
+
+- name: Restarting syslog
+  service:
+    name: syslogd
+    state: restarted
 
