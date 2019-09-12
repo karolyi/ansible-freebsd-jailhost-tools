@@ -1,44 +1,20 @@
 
 # IMPORTANT: after the IP that is 2 TABULATOR characters !
-- name: Getting matching /etc/hosts files (IPv4)
-  command: >-
-    /bin/sh -c "/usr/bin/grep -lE
-    '^[0-9]+.[0-9]+.[0-9]+.[0-9]+		jail-{{ jail_name.replace("_", "-") }}'
-    /etc/hosts {{ static_jails_path }}/*/etc/hosts {{ dynamic_jails_path }}/*/etc/hosts"
-  ignore_errors: yes
-  failed_when: false
-  register: matching_hosts_files_v4
-
 - name: Replacing appropriate jail names with new IP addresses in /etc/hosts files (IPv4)
   lineinfile:
-    dest: '{{ filename }}'
+    dest: /etc/hosts
     regexp: '^\d+\.\d+\.\d+\.\d+		jail-{{ jail_name.replace("_", "-") }}'
     line: '{{ vars["jail_" + jail_name + "_new_ip4"] }}		jail-{{ jail_name.replace("_", "-") }}'
     state: present
-  with_items: '{{ matching_hosts_files_v4.stdout_lines }}'
-  loop_control:
-    loop_var: filename
 
 - block:
   # IMPORTANT: after the IP that is 2 TABULATOR characters !
-  - name: Getting matching /etc/hosts files (IPv6)
-    command: >-
-      /bin/sh -c "/usr/bin/grep -lE
-      '^[0-9a-f:]+		jail-{{ jail_name.replace("_", "-") }}'
-      /etc/hosts {{ static_jails_path }}/*/etc/hosts {{ dynamic_jails_path }}/*/etc/hosts"
-    ignore_errors: yes
-    failed_when: false
-    register: matching_hosts_files_v6
-
   - name: Replacing appropriate jail names with new IP addresses in /etc/hosts files (IPv6)
     lineinfile:
-      dest: '{{ filename }}'
+      dest: /etc/hosts
       regexp: '^[0-9a-f:]+		jail-{{ jail_name.replace("_", "-") }}'
       line: '{{ jail_THIS_with_ip6 }}		jail-{{ jail_name.replace("_", "-") }}'
       state: present
-    with_items: '{{ matching_hosts_files_v6.stdout_lines }}'
-    loop_control:
-      loop_var: filename
   when: 'jail_THIS_with_ip6 != False'
 
 - name: Sending HUP to any any crucial processes to reload their configuration

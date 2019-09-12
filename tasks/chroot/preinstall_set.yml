@@ -26,3 +26,11 @@
     name: syslogd
     state: restarted
 
+- name: Mounting directories
+  command:
+    /sbin/mount
+    -a -F
+    {{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}/fstab
+  args:
+    warn: no
+
