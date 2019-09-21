@@ -17,6 +17,7 @@
 - name: Mounting devFS into chroot for pkg
   mount:
     src: devfs
+    fstab: /tmp/delete-me-fstab
     path: '{{ vars["jail_" + jail_name + "_new_path"] }}/dev'
     fstype: devfs
     state: mounted
