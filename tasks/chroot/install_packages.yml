@@ -1,0 +1,16 @@
+- name: "Installing packages: {{ install_packages }}"
+  pkgng:
+    chroot: '{{ vars["jail_" + jail_name + "_new_path"] }}'
+    state: latest
+    name: "{{ install_packages }}"
+  register: install_result
+  ignore_errors: true
+
+- name: Refresh pkg mirror when package install failed
+  command: |
+    '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tools/pkgmirror-jailrevalidator.py'
+    '{{ pkgmirror_url }}' '{{ vars["jail_" + jail_name + "_new_path"] }}' '{{ install_packages }}'
+  register: revalidate_command
+  when: install_result.failed
+
+# vim: sw=2

@@ -35,3 +35,22 @@
     name: syslogd
     state: restarted
 
+- include_tasks:
+    file: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/chroot/install_packages.yml'
+  when:
+    - vars['install_packages']|default('') != ''
+
+- include_tasks:
+    file: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/chroot/install_packages.yml'
+  when:
+    - vars['install_packages']|default('') != ''
+    - install_result.failed
+
+- name: Fail when install failed
+  fail:
+    msg: '{{ install_result.msg }}'
+  when:
+    - vars['install_packages']|default('') != ''
+    - install_result.failed
+
+# vim: sw=2
