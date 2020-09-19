@@ -17,13 +17,18 @@
 # ---
 # UPDATING the existing jail when the base system is not outdated
 # ---
+
 - block:
 
   - name: Check if packages have to be upgraded
     command:
       /usr/sbin/pkg
       -j {{ vars['jail_' + jail_name + '_newest_id'] }}
-      upgrade --dry-run -y
+      upgrade --dry-run
+    environment:
+      AUTOCLEAN: YES
+      ASSUME_ALWAYS_YES: YES
+      HANDLE_RC_SCRIPTS: YES
     register: jail_pkgs
     ignore_errors: true
     changed_when: jail_pkgs.rc != 0
@@ -36,37 +41,43 @@
     command:
       /usr/sbin/pkg
       -j {{ vars['jail_' + jail_name + '_newest_id'] }}
-      upgrade -y
+      upgrade
+    environment:
+      AUTOCLEAN: YES
+      ASSUME_ALWAYS_YES: YES
+      HANDLE_RC_SCRIPTS: YES
     when: jail_pkgs is changed
 
-  when: jail_THIS_must_replace
+  when: not jail_THIS_must_replace
 
 
 
-# ---
-# CREATING a new jail when the base system is outdated
-# ---
-- block:
+# # ---
+# # CREATING a new jail when the base system is outdated
+# # ---
+# 
+# - block:
+# 
+#   - include_tasks: '{{ vars["jail_" + jail_name + "_include_update_precreate"] | default(jail_include_noop) }}'
+#     vars:
+#       include_type: '{{ "jail_" + jail_name + "_include_update_precreate" }}'
+# 
+#   - name: Creating a new {{ jail_name }} jail
+#     include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/create.yml'
+# 
+#   - include_tasks: '{{ vars["jail_" + jail_name + "_include_update_prestart"] | default(jail_include_noop) }}'
+#     vars:
+#       include_type: '{{ "jail_" + jail_name + "_include_update_prestart" }}'
+# 
+#   - name: Starting the new {{ jail_name }} jail
+#     include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/start.yml'
+# 
+#   - include_tasks: '{{ vars["jail_" + jail_name + "_include_update_poststart"] | default(jail_include_noop) }}'
+#     vars:
+#       include_type: '{{ "jail_" + jail_name + "_include_update_poststart" }}'
+# 
+#   when: jail_THIS_must_replace
 
-  - include_tasks: '{{ vars["jail_" + jail_name + "_include_update_precreate"] | default(jail_include_noop) }}'
-    vars:
-      include_type: '{{ "jail_" + jail_name + "_include_update_precreate" }}'
-
-  - name: Creating a new {{ jail_name }} jail
-    include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/create.yml'
-
-  - include_tasks: '{{ vars["jail_" + jail_name + "_include_update_prestart"] | default(jail_include_noop) }}'
-    vars:
-      include_type: '{{ "jail_" + jail_name + "_include_update_prestart" }}'
-
-  - name: Starting the new {{ jail_name }} jail
-    include_tasks: '{{ ansible_roles_path }}/karolyi.ansible-freebsd-jailhost-tools/tasks/jail/start.yml'
-
-  - include_tasks: '{{ vars["jail_" + jail_name + "_include_update_poststart"] | default(jail_include_noop) }}'
-    vars:
-      include_type: '{{ "jail_" + jail_name + "_include_update_poststart" }}'
-
-  when: jail_THIS_must_replace
-
+# vim: sw=2
 
 

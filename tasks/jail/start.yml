@@ -64,3 +64,5 @@
       vars['jail_' + jail_name + '_newest_id']
     }}
   when: not jail_THIS_with_ip6
+
+# vim: sw=2

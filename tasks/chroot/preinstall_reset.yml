@@ -23,3 +23,4 @@
     content: |
       nameserver {{ vars["jail_" + jail_name + "_new_ip4"] }}
 
+# vim: sw=2

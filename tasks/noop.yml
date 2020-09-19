@@ -2,3 +2,5 @@
     'NOOP, included variable name: {{ include_type | default("unknown")}}'
   debug:
     msg: 'NOOP, included variable name: {{ include_type | default("unknown")}}'
+
+# vim: sw=2
