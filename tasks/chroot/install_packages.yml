@@ -13,4 +13,11 @@
   register: revalidate_command
   when: install_result.failed
 
+- name: Cleaning downloaded package cache in jail
+  command:
+    /usr/sbin/pkg
+    -c {{ vars["jail_" + jail_name + "_new_path"] }}
+    clean -ayq
+  when: install_result.failed
+
 # vim: sw=2
