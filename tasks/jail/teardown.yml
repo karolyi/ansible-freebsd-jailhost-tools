@@ -41,34 +41,37 @@
 
 - name: Delete syslog socket and its directory to avoid recreating log socket
   file:
-    path: '{{ dynamic_jails_path }}/{{ jail_id }}/var/run'
+    path: '{{ dynamic_jails_path }}/{{ jail_id }}/var/run/log'
     state: absent
 
-- name: Restarting syslog to remove its log socket from kernel FDs
-  service:
-    name: syslogd
-    state: restarted
+# - name: Restarting syslog to remove its log socket from kernel FDs
+#   service:
+#     name: syslogd
+#     state: restarted
  
 - name: Delete config dir for jail
   file:
     path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'
     state: absent
 
-- name: Destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-  zfs:
-    name: >-
-      {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-    state: absent
-  register: zfs_destroy
-  ignore_errors: yes
+# FreeBSD 13 started to give errors here, maybe try later
+#
+# - name: Destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }}
+#   zfs:
+#     name: >-
+#       {{ dynamic_jails_dataset_name }}/{{ jail_id }}
+#     state: absent
+#   register: zfs_destroy
+#   ignore_errors: yes
 
 # Due to a possible bug in the ZFS/FreeBSD kernel, destroying the dataset
 # sometimes isn't possible after freeing it up. Hence we use '-f'
-- name: Force-destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }} because it failed formerly
+- name: Force-destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }}
   command:
     /sbin/zfs destroy -f
     {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-  when: 'zfs_destroy is failed and ": Device busy" in zfs_destroy.msg'
+#  when: 'zfs_destroy is failed and ": Device busy" in zfs_destroy.msg'
+#  ignore_errors: yes
 
 - name: Removing jail directory
   file:
