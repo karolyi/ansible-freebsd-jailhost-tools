@@ -39,11 +39,16 @@
   loop_control:
     loop_var: mountpoint
 
-- name: Delete syslog socket
+- name: Delete syslog socket and its directory to avoid recreating log socket
   file:
-    path: '{{ dynamic_jails_path }}/{{ jail_id }}/var/run/log'
+    path: '{{ dynamic_jails_path }}/{{ jail_id }}/var/run'
     state: absent
 
+- name: Restarting syslog to remove its log socket from kernel FDs
+  service:
+    name: syslogd
+    state: restarted
+ 
 - name: Delete config dir for jail
   file:
     path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'
