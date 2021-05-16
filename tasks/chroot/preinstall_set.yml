@@ -15,7 +15,7 @@
       nameserver 127.0.0.1
 
 - name: Mounting devFS into chroot for pkg
-  mount:
+  ansible.posix.mount:
     src: devfs
     fstab: /tmp/delete-me-fstab
     path: '{{ vars["jail_" + jail_name + "_new_path"] }}/dev'

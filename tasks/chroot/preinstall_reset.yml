@@ -13,7 +13,7 @@
     warn: no
 
 - name: Unmounting devFS from chroot
-  mount:
+  ansible.posix.mount:
     path: '{{ vars["jail_" + jail_name + "_new_path"] }}/dev'
     state: unmounted
 
