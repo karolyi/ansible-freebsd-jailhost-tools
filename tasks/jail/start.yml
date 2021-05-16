@@ -65,7 +65,7 @@
   when: 'jail_THIS_with_ip6 != False'
 
 - name: Starting jail when no IPv6 present
-  command:
+  ansible.builtin.command:
     jail -c
     {{
       vars['jail_' + jail_name + '_newest_id']

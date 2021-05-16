@@ -53,7 +53,7 @@
   when: local_resolv is failed
 
 - name: Setup timezone in jail
-  command:
+  ansible.builtin.command:
     /usr/sbin/tzsetup
     -C {{ vars['jail_' + jail_name + '_new_path'] }}
     {{ vars['jail_' + jail_name + '_timezone'|default(vars['default_timezone'])] }}

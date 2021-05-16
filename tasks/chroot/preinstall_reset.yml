@@ -1,11 +1,11 @@
 - name: Cleaning pkg cache
-  command:
+  ansible.builtin.command:
     /usr/sbin/pkg
     -c {{ vars["jail_" + jail_name + "_new_path"] }}
     clean -ayq
 
 - name: Unmounting directories
-  command:
+  ansible.builtin.command:
     /sbin/umount
     -a -F
     {{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}/fstab

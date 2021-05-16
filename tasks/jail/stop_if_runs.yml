@@ -4,7 +4,7 @@
       {{ jail_id in running_jail_ids }}
 
 - name: Terminating jail when running
-  command:
+  ansible.builtin.command:
     /usr/sbin/jail -r {{ jail_id }}
   when: jail_is_old_running
 

@@ -23,7 +23,7 @@
     state: mounted
 
 - name: Mounting directories
-  command:
+  ansible.builtin.command:
     /sbin/mount
     -a -F
     {{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}/fstab

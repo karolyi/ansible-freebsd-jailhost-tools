@@ -21,7 +21,7 @@
 - block:
 
   - name: Check if packages have to be upgraded
-    command:
+    ansible.builtin.command:
       /usr/sbin/pkg
       -j {{ vars['jail_' + jail_name + '_newest_id'] }}
       upgrade --dry-run
@@ -38,7 +38,7 @@
       jail_{{ jail_name }}_pkgs: '{{ jail_pkgs }}'
 
   - name: Upgrade packages when necessary
-    command:
+    ansible.builtin.command:
       /usr/sbin/pkg
       -j {{ vars['jail_' + jail_name + '_newest_id'] }}
       upgrade

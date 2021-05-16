@@ -18,7 +18,7 @@
   when: 'jail_THIS_with_ip6 != False'
 
 - name: Sending HUP to any any crucial processes to reload their configuration
-  command:
+  ansible.builtin.command:
     /usr/bin/killall -HUP dnsmasq
   failed_when: false
 
