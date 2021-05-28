@@ -40,7 +40,7 @@
     loop_var: mountpoint
 
 - name: Delete syslog socket and its directory to avoid recreating log socket
-  file:
+  ansible.builtin.file:
     path: '{{ dynamic_jails_path }}/{{ jail_id }}/var/run/log'
     state: absent
 
@@ -50,19 +50,18 @@
 #     state: restarted
  
 - name: Delete config dir for jail
-  file:
+  ansible.builtin.file:
     path: '{{ dynamic_jails_path }}/configs/{{ jail_id }}'
     state: absent
 
 # FreeBSD 13 started to give errors here, maybe try later
-#
-# - name: Destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-#   zfs:
-#     name: >-
-#       {{ dynamic_jails_dataset_name }}/{{ jail_id }}
-#     state: absent
-#   register: zfs_destroy
-#   ignore_errors: yes
+- name: Destroying ZFS dataset {{ dynamic_jails_dataset_name }}/{{ jail_id }}
+  community.general.zfs:
+    name: >-
+      {{ dynamic_jails_dataset_name }}/{{ jail_id }}
+    state: absent
+  register: zfs_destroy
+  ignore_errors: yes
 
 # Due to a possible bug in the ZFS/FreeBSD kernel, destroying the dataset
 # sometimes isn't possible after freeing it up. Hence we use '-f'
@@ -74,7 +73,7 @@
 #  ignore_errors: yes
 
 - name: Removing jail directory
-  file:
+  ansible.builtin.file:
     path: >-
       {{ dynamic_jails_path }}/{{ jail_id }}
     state: absent

@@ -19,7 +19,7 @@
     jail_{{ jail_name }}_new_ip4: '{{ available_jail_ip4 }}'
 
 - name: Clone a new ZFS filesystem for the jail
-  zfs:
+  community.general.zfs:
     origin: '{{ template_dataset_root_name }}@{{ latest_snapshot }}'
     name: '{{ vars["jail_" + jail_name + "_new_dataset_name"] }}'
     state: present
@@ -59,7 +59,7 @@
     {{ vars['jail_' + jail_name + '_timezone'|default(vars['default_timezone'])] }}
 
 - name: Create config dir for jail
-  file:
+  ansible.builtin.file:
     path: '{{ dynamic_jails_path }}/configs/{{ vars["jail_" + jail_name + "_newest_id"] }}'
     state: directory
 

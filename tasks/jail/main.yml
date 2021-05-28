@@ -25,7 +25,7 @@
     jail_THIS_with_ip6: "{{ vars['jail_' + jail_name + '_ip6'] | default(False) }}"
 
 - name: Ensure config directory exists for the generated jails
-  file:
+  ansible.builtin.file:
     path: '{{ dynamic_jails_path }}/configs'
     state: directory
 
